@@ -1,31 +1,55 @@
 import discord
+from discord.ext import commands
 from botlogic import generador
-
-# La variable intents almacena los privilegios del bot
+from botlogic import gira_una_moneda
+from botlogic import gen_emoji
 intents = discord.Intents.default()
-# Activar el privilegio de lectura de mensajes
 intents.message_content = True
-# Crear un bot en la variable cliente y transferirle los privilegios
-client = discord.Client(intents=intents)
 
-@client.event
+bot = commands.Bot(command_prefix='$', intents=intents)
+
+@bot.event
 async def on_ready():
-    print(f'Hemos iniciado sesión como {client.user}')
+    print(f'We have logged in as {bot.user}')
 
-@client.event
-async def on_message(message):
-    if message.author == client.user:
+@bot.command()
+async def hello(ctx):
+    await ctx.send(f'Hola, soy un bot {bot.user}!')
+
+@bot.command()
+async def heh(ctx, count_heh = 5):
+    await ctx.send("he" * count_heh)
+
+@bot.command()
+async def gen(ctx):
+    await ctx.send(f"Tu contraseña generada es: {generador(10)}")
+
+@bot.command()
+async def moneda(ctx):
+    await ctx.send(f"La moneda callo y dio: {gira_una_moneda()}")
+
+@bot.command()
+async def emogi(ctx):
+    await ctx.send(f" {gen_emoji()}")
+
+@bot.command()
+async def joined(ctx, member: discord.Member):
+    """Says when a member joined."""
+    await ctx.send(f'{member.name} joined {discord.utils.format_dt(member.joined_at)}')
+
+@bot.command()
+async def repeat(ctx, times: int, content='repeating...'):
+    """Repeats a message multiple times."""
+    for i in range(times):
+        await ctx.send(content)
+
+@bot.command()
+async def roll(ctx, dice: str):
+    """Rolls a dice in NdN format."""
+    try:
+        rolls, limit = map(int, dice.split('d'))
+    except Exception:
+        await ctx.send('Format has to be in NdN!')
         return
-    if message.content.startswith('$hello'):
-        await message.channel.send("Hi!")
-    if message.content.startswith('$hola'):
-        await message.channel.send("Hola como estas?")
-    elif message.content.startswith('$bye'):
-        await message.channel.send("\U0001f642")
-    elif message.content.startswith("gen"):
-        await message.channel.send(f"Tu contraseña generada es: {generador(10)}")
-    else:
-        await message.channel.send(message.content)
 
-
-client.run("Coloca tu token privado!")
+bot.run("PON TU TOKEN SECRETO")
